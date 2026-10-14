@@ -21,6 +21,7 @@ import { AccountModule } from './modules/account/account.module';
 import { BadgesModule } from './modules/badges/badges.module';
 import { CircleModule } from './modules/circle/circle.module';
 import { CreatorsModule } from './modules/creators/creators.module';
+import { DishesModule } from './modules/dishes/dishes.module';
 import { InvitesModule } from './modules/invites/invites.module';
 import { ListsModule } from './modules/lists/lists.module';
 import { MailModule } from './modules/mail/mail.module';
@@ -62,6 +63,7 @@ import { UsersModule } from './modules/users/users.module';
     BadgesModule,
     UsersModule,
     CreatorsModule,
+    DishesModule,
   ],
   providers: [
     // Applied to every route of every module, current and future.

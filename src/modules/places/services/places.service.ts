@@ -1,6 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../../../database/services/database.service';
-import { ListPlacesQueryDto, PlaceDetailDto, PlaceStatsDto, PlaceSummaryDto, PlaceTagDto } from '../dto/places.dto';
+import {
+  ListPlacesQueryDto,
+  PlaceDetailDto,
+  PlaceDishDto,
+  PlaceStatsDto,
+  PlaceSummaryDto,
+  PlaceTagDto,
+} from '../dto/places.dto';
 
 const SUMMARY_COLUMNS = `p.id, p.name, p.slug, a.name as area, p.lat, p.lng, p.price_level as "priceLevel"`;
 const EMPTY_STATS: PlaceStatsDto = {
@@ -29,6 +36,10 @@ export class PlacesService {
     );
   }
 
+  dishes(placeId: string): Promise<PlaceDishDto[]> {
+    return this.db.query<PlaceDishDto>(`select id, name from dishes where place_id = $1 order by name`, [placeId]);
+  }
+
   async get(id: string): Promise<PlaceDetailDto> {
     const place = await this.db.queryOne<PlaceSummaryDto & { address: string | null }>(
       `select ${SUMMARY_COLUMNS}, p.address
@@ -49,6 +60,7 @@ export class PlacesService {
          from place_stats where place_id = $1`,
       [id],
     );
-    return { ...place, tags, stats: stats ?? EMPTY_STATS };
+    const dishes = await this.dishes(id);
+    return { ...place, tags, dishes, stats: stats ?? EMPTY_STATS };
   }
 }

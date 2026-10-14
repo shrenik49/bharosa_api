@@ -1,4 +1,4 @@
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { IsIn, IsInt, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min } from 'class-validator';
 import { PaginationQueryDto } from '../../../common/dto/pagination.dto';
 
@@ -58,7 +58,7 @@ export class PhotoDto {
   userId: string;
   storagePath: string;
   thumbPath: string | null;
-  /** Full URL when MEDIA_BASE_URL is configured, otherwise null. */
+  /** Where the file is served: MEDIA_BASE_URL when set, otherwise the API serves it under /media. */
   url: string | null;
   thumbUrl: string | null;
   width: number | null;
@@ -67,4 +67,24 @@ export class PhotoDto {
   likeCount: number;
   likedByMe: boolean;
   createdAt: Date;
+}
+
+/** Fields sent alongside the image file in a multipart upload. */
+export class UploadPhotoDto {
+  @IsUUID()
+  visitId: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(8000)
+  width?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(8000)
+  height?: number;
 }

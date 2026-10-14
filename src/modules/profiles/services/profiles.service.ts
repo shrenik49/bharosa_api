@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../../../database/services/database.service';
-import { ProfileResponseDto, UpdateProfileDto } from '../dto/profiles.dto';
+import { ProfileResponseDto, TasteAffinityDto, TasteInterestDto, UpdateProfileDto } from '../dto/profiles.dto';
 
 interface ProfileRow {
   id: string;
@@ -75,6 +75,22 @@ export class ProfilesService {
         flags: row.flags ?? 0,
       },
     };
+  }
+
+  interests(userId: string): Promise<TasteInterestDto[]> {
+    return this.db.query<TasteInterestDto>(
+      `select t.id as "tagId", t.name, t.kind from user_interests ui join tags t on t.id = ui.tag_id
+        where ui.user_id = $1 order by t.sort, t.name`,
+      [userId],
+    );
+  }
+
+  affinity(userId: string, limit = 8): Promise<TasteAffinityDto[]> {
+    return this.db.query<TasteAffinityDto>(
+      `select t.id as "tagId", t.name, a.affinity from user_tag_affinity a join tags t on t.id = a.tag_id
+        where a.user_id = $1 order by a.affinity desc limit $2`,
+      [userId, limit],
+    );
   }
 
   async update(userId: string, dto: UpdateProfileDto): Promise<ProfileResponseDto> {

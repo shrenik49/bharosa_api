@@ -31,6 +31,11 @@ export class OnboardingService {
            on conflict (user_id, tag_id) do nothing`,
           [userId, tagIds],
         );
+        // Retaking the quiz replaces the earlier answers: drop onboarding picks that were not chosen again.
+        await tx.query(
+          `delete from user_interests where user_id = $1 and source = 'onboarding' and tag_id <> all($2::int[])`,
+          [userId, tagIds],
+        );
       }
 
       if (placeIds.length > 0) {

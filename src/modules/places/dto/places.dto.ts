@@ -38,8 +38,15 @@ export class PlaceStatsDto {
   photoCount: number;
 }
 
+export class PlaceDishDto {
+  id: string;
+  name: string;
+}
+
 export class PlaceDetailDto extends PlaceSummaryDto {
   address: string | null;
   tags: PlaceTagDto[];
+  /** Dishes people have logged at this place; the menu builds itself from visits. */
+  dishes: PlaceDishDto[];
   stats: PlaceStatsDto;
 }

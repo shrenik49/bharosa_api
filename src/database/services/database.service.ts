@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Pool, PoolClient, QueryResultRow, types } from 'pg';
 import { EnvVars } from '../../config/env.config';
@@ -27,6 +27,7 @@ class TransactionClient implements Queryable {
 
 @Injectable()
 export class DatabaseService implements Queryable, OnModuleDestroy {
+  private readonly logger = new Logger(DatabaseService.name);
   readonly pool: Pool;
 
   constructor(config: ConfigService<EnvVars, true>) {
@@ -38,7 +39,10 @@ export class DatabaseService implements Queryable, OnModuleDestroy {
       connectionTimeoutMillis: 5_000,
       idleTimeoutMillis: 30_000,
       statement_timeout: 10_000,
+      keepAlive: true,
     });
+    // A dropped idle connection (hosted databases recycle them) must not crash the process; the pool replaces it.
+    this.pool.on('error', error => this.logger.warn(`idle database connection dropped: ${error.message}`));
   }
 
   async query<T extends QueryResultRow = QueryResultRow>(sql: string, params: unknown[] = []): Promise<T[]> {

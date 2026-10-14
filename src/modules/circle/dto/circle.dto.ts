@@ -18,6 +18,7 @@ export class CircleMemberDto {
   handle: string;
   displayName: string;
   avatarPath: string | null;
+  isCreator: boolean;
   relation: CircleRelation;
   addedAt: Date;
 }
@@ -27,6 +28,7 @@ export class TasteTwinDto {
   handle: string;
   displayName: string;
   avatarPath: string | null;
+  isCreator: boolean;
   /** 0-1: how closely their scores match yours on places you both ranked. */
   score: number;
   /** How many places you both ranked. */

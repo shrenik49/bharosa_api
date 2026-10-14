@@ -41,4 +41,5 @@ export class VisitResponseDto {
 
 export class VisitWithPlaceDto extends VisitResponseDto {
   placeName: string;
+  area: string | null;
 }

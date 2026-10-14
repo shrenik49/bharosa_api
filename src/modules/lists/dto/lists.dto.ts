@@ -48,6 +48,10 @@ export class ListItemDto {
   placeId: string;
   name: string;
   area: string | null;
+  lat: number;
+  lng: number;
+  /** Tag slugs of the place (for example `late-night`), so the Saved screen can filter. */
+  tagSlugs: string[];
   note: string | null;
   addedAt: Date;
 }
@@ -61,6 +65,8 @@ export class BeenThereDto {
   placeId: string;
   name: string;
   area: string | null;
+  lat: number;
+  lng: number;
   visits: number;
   lastVisit: Date;
 }

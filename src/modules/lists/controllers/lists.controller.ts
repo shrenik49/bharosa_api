@@ -37,6 +37,28 @@ export class ListsController {
     return this.lists.beenThere(user.id);
   }
 
+  /** The "Want to try" list, with its places. */
+  @Get('want')
+  @ApiOkResponse({ type: ListDetailDto })
+  async want(@CurrentUser() user: AuthUser): Promise<ListDetailDto> {
+    return this.lists.get(user.id, await this.lists.wantListId(user.id));
+  }
+
+  /** Saves a place to "Want to try". Safe to repeat. */
+  @HttpCode(204)
+  @Put('want/items/:placeId')
+  @ApiNoContentResponse()
+  async saveToWant(@CurrentUser() user: AuthUser, @Param('placeId', ParseUUIDPipe) placeId: string): Promise<void> {
+    await this.lists.addItem(user.id, await this.lists.wantListId(user.id), placeId);
+  }
+
+  @HttpCode(204)
+  @Delete('want/items/:placeId')
+  @ApiNoContentResponse()
+  async removeFromWant(@CurrentUser() user: AuthUser, @Param('placeId', ParseUUIDPipe) placeId: string): Promise<void> {
+    await this.lists.removeItem(user.id, await this.lists.wantListId(user.id), placeId);
+  }
+
   @Post()
   @ApiCreatedResponse({ type: ListSummaryDto })
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateListDto): Promise<ListSummaryDto> {

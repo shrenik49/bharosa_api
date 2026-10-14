@@ -12,6 +12,8 @@ export interface EnvVars {
   ENABLE_JOBS: boolean;
   /** Public base URL where uploaded photos are served from (CDN or bucket). Empty until storage is chosen. */
   MEDIA_BASE_URL: string;
+  /** Folder where uploaded photos are stored while the API serves them itself (served at /media). */
+  UPLOAD_DIR: string;
 }
 
 function required(env: Record<string, unknown>, key: string): string {
@@ -54,5 +56,6 @@ export function validateEnv(env: Record<string, unknown>): EnvVars {
     SWAGGER_ENABLED: bool(env.SWAGGER_ENABLED, !isProduction),
     ENABLE_JOBS: bool(env.ENABLE_JOBS, true),
     MEDIA_BASE_URL: typeof env.MEDIA_BASE_URL === 'string' ? env.MEDIA_BASE_URL.trim().replace(/\/+$/, '') : '',
+    UPLOAD_DIR: typeof env.UPLOAD_DIR === 'string' && env.UPLOAD_DIR.trim() ? env.UPLOAD_DIR.trim() : 'uploads',
   };
 }

@@ -26,6 +26,10 @@ export class PublicProfileDto extends UserSummaryDto {
   flags: number;
   /** How I follow this person, if at all. */
   relation: 'friend' | 'creator' | 'twin' | null;
+  /** How closely this person's taste matches mine, 0-1, once we have enough places in common. */
+  similarityScore: number | null;
+  /** How many places we have both ranked. */
+  similarityOverlap: number | null;
   badges: BadgeDto[];
 }
 

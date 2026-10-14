@@ -26,7 +26,7 @@ export class ListsService {
   /** Places the person has a verified visit at ("Been there" tab). */
   beenThere(userId: string): Promise<BeenThereDto[]> {
     return this.db.query<BeenThereDto>(
-      `select b.place_id as "placeId", p.name, a.name as area, b.visits::int as visits, b.last_visit as "lastVisit"
+      `select b.place_id as "placeId", p.name, a.name as area, p.lat, p.lng, b.visits::int as visits, b.last_visit as "lastVisit"
          from been_there b join places p on p.id = b.place_id left join areas a on a.id = p.area_id
         where b.user_id = $1 order by b.last_visit desc`,
       [userId],
@@ -41,6 +41,20 @@ export class ListsService {
     return this.summary(userId, (row as { id: string }).id);
   }
 
+  /** The id of the person's "Want to try" list (created at signup; recreated if somehow missing). */
+  async wantListId(userId: string): Promise<string> {
+    const existing = await this.db.queryOne<{ id: string }>(
+      `select id from lists where user_id = $1 and kind = 'want'`,
+      [userId],
+    );
+    if (existing) return existing.id;
+    const created = await this.db.queryOne<{ id: string }>(
+      `insert into lists(user_id, name, kind) values ($1, 'Want to try', 'want') returning id`,
+      [userId],
+    );
+    return (created as { id: string }).id;
+  }
+
   /** A list is visible to its owner, and to everyone once it is public. */
   async get(viewerId: string, listId: string): Promise<ListDetailDto> {
     const list = await this.db.queryOne<ListSummaryDto & { ownerId: string }>(
@@ -50,7 +64,9 @@ export class ListsService {
     );
     if (!list) throw new NotFoundException('List not found');
     const items = await this.db.query<ListItemDto>(
-      `select li.place_id as "placeId", p.name, a.name as area, li.note, li.added_at as "addedAt"
+      `select li.place_id as "placeId", p.name, a.name as area, p.lat, p.lng, li.note, li.added_at as "addedAt",
+              coalesce((select array_agg(t.slug order by t.slug) from place_tags pt join tags t on t.id = pt.tag_id
+                         where pt.place_id = p.id), '{}') as "tagSlugs"
          from list_items li join places p on p.id = li.place_id left join areas a on a.id = p.area_id
         where li.list_id = $1 order by li.added_at desc`,
       [listId],

@@ -29,8 +29,11 @@ export class UsersService {
               coalesce(t.verified_visits, 0)::int as "verifiedVisits",
               coalesce(t.places_revisited, 0)::int as "placesRevisited",
               coalesce(t.flags, 0)::int as flags,
-              (select cm.relation from circle_members cm where cm.owner_id = $1 and cm.member_id = p.id) as relation
-         from profiles p left join user_trust_stats t on t.user_id = p.id
+              (select cm.relation from circle_members cm where cm.owner_id = $1 and cm.member_id = p.id) as relation,
+              ts.score as "similarityScore", ts.overlap::int as "similarityOverlap"
+         from profiles p
+         left join user_trust_stats t on t.user_id = p.id
+         left join taste_similarity ts on ts.user_id = $1 and ts.other_id = p.id
         where p.id = $2 and p.deleted_at is null`,
       [viewerId, userId],
     );
