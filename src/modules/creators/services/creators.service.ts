@@ -3,12 +3,12 @@ import { DatabaseService } from '../../../database/services/database.service';
 import { CreatorDto, UpdateCreatorProfileDto } from '../dto/creators.dto';
 
 const CREATOR = `p.id as "userId", p.handle, p.display_name as "displayName", p.avatar_path as "avatarPath",
-  cp.tagline, cp.links, cp.disclosure_policy as "disclosurePolicy", cp.verified_at as "verifiedAt",
+  cp.tagline, coalesce(cp.links, '{}'::jsonb) as links, cp.disclosure_policy as "disclosurePolicy", cp.verified_at as "verifiedAt",
   coalesce(cs.verified_visits, 0)::int as "verifiedVisits", cs.paid_own_pct as "paidOwnPct",
   coalesce(cs.sponsored_flagged, 0)::int as "sponsoredFlagged"`;
 
 const FROM = `from profiles p
-  join creator_profiles cp on cp.user_id = p.id
+  left join creator_profiles cp on cp.user_id = p.id
   left join creator_stats cs on cs.user_id = p.id`;
 
 /** Creator transparency screen: what a creator says about themselves next to numbers derived from their visits. */
@@ -18,7 +18,7 @@ export class CreatorsService {
 
   list(limit: number, offset: number): Promise<CreatorDto[]> {
     return this.db.query<CreatorDto>(
-      `select ${CREATOR} ${FROM} where p.is_creator and p.deleted_at is null
+      `select ${CREATOR} ${FROM} where p.is_creator and cp.user_id is not null and p.deleted_at is null
         order by cs.verified_visits desc nulls last, p.display_name limit $1 offset $2`,
       [limit, offset],
     );

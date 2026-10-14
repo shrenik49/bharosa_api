@@ -110,13 +110,13 @@ export class VisitsService {
   }
 
   async listMine(userId: string, limit: number, offset: number): Promise<VisitWithPlaceDto[]> {
-    const rows = await this.db.query<VisitRow & { place_name: string }>(
-      `select v.id, v.place_id, v.method, v.status, v.visited_at, v.verified_at, v.distance_m, p.name as place_name
-         from visits v join places p on p.id = v.place_id
+    const rows = await this.db.query<VisitRow & { place_name: string; area: string | null }>(
+      `select v.id, v.place_id, v.method, v.status, v.visited_at, v.verified_at, v.distance_m, p.name as place_name, a.name as area
+         from visits v join places p on p.id = v.place_id left join areas a on a.id = p.area_id
         where v.user_id = $1 and v.status = 'verified'
         order by v.visited_at desc limit $2 offset $3`,
       [userId, limit, offset],
     );
-    return rows.map(row => ({ ...toVisit(row), placeName: row.place_name }));
+    return rows.map(row => ({ ...toVisit(row), placeName: row.place_name, area: row.area }));
   }
 }

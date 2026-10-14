@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse,
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { PaginationQueryDto } from '../../../common/dto/pagination.dto';
 import { AuthUser } from '../../../common/interfaces/auth.interface';
-import { CreateReviewDto, ReviewDto, UpdateReviewDto } from '../dto/reviews.dto';
+import { CreateReviewDto, ListReviewsQueryDto, ReviewDto, UpdateReviewDto } from '../dto/reviews.dto';
 import { ReviewsService } from '../services/reviews.service';
 
 @ApiTags('reviews')
@@ -46,8 +46,8 @@ export class ReviewsController {
   forPlace(
     @CurrentUser() user: AuthUser,
     @Param('placeId', ParseUUIDPipe) placeId: string,
-    @Query() { limit, offset }: PaginationQueryDto,
+    @Query() { filter, limit, offset }: ListReviewsQueryDto,
   ): Promise<ReviewDto[]> {
-    return this.reviews.forPlace(user.id, placeId, limit, offset);
+    return this.reviews.forPlace(user.id, placeId, filter === 'circle', limit, offset);
   }
 }

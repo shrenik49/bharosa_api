@@ -11,7 +11,10 @@ const REVIEW = `r.id, r.place_id as "placeId", r.body, r.like_count as "likeCoun
 export class ReviewsService {
   constructor(private readonly db: DatabaseService) {}
 
-  /** "A line for your circle": only on a verified visit of your own (also enforced by a database trigger). */
+  /**
+   * "A line for your circle": only on a verified visit of your own (also enforced by a database trigger).
+   * One review per visit, so saving again replaces the text instead of failing.
+   */
   async create(userId: string, visitId: string, body: string): Promise<ReviewDto> {
     const visit = await this.db.queryOne<{ place_id: string }>(
       `select place_id from visits where id = $1 and user_id = $2 and status = 'verified'`,
@@ -19,7 +22,9 @@ export class ReviewsService {
     );
     if (!visit) throw new ForbiddenException('Visit not found or not verified');
     const row = await this.db.queryOne<{ id: string }>(
-      `insert into reviews(visit_id, user_id, place_id, body) values ($1, $2, $3, $4) returning id`,
+      `insert into reviews(visit_id, user_id, place_id, body) values ($1, $2, $3, $4)
+       on conflict (visit_id) do update set body = excluded.body
+       returning id`,
       [visitId, userId, visit.place_id, body],
     );
     return this.getOne(userId, (row as { id: string }).id);
@@ -44,12 +49,19 @@ export class ReviewsService {
   }
 
   /** Reviews follow each author's "who can see my ratings" setting. */
-  forPlace(viewerId: string, placeId: string, limit: number, offset: number): Promise<ReviewDto[]> {
+  forPlace(
+    viewerId: string,
+    placeId: string,
+    circleOnly: boolean,
+    limit: number,
+    offset: number,
+  ): Promise<ReviewDto[]> {
     return this.db.query<ReviewDto>(
       `select ${REVIEW} from reviews r join profiles p on p.id = r.user_id
         where r.place_id = $2 and not r.is_hidden and p.deleted_at is null and can_see_user($1, r.user_id)
-        order by r.created_at desc limit $3 offset $4`,
-      [viewerId, placeId, limit, offset],
+          and (not $3 or exists (select 1 from circle_members cm where cm.owner_id = $1 and cm.member_id = r.user_id))
+        order by r.created_at desc limit $4 offset $5`,
+      [viewerId, placeId, circleOnly, limit, offset],
     );
   }
 

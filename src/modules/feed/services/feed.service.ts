@@ -31,6 +31,7 @@ export class FeedService {
     filter: string,
     limit: number,
     offset: number,
+    placeId?: string,
   ): Promise<FeedItemDto[]> {
     const city = await this.db.queryOne<{ id: number }>('select id from cities where slug = $1', [citySlug]);
     if (!city) throw new NotFoundException('Unknown city');
@@ -41,6 +42,7 @@ export class FeedService {
            from places p
            left join areas a on a.id = p.area_id
           where p.city_id = $1 and p.status = 'active'
+            and ($11::uuid is null or p.id = $11::uuid)
             and ($3 in ('all', 'circle')
                  or exists (select 1 from place_tags pt join tags t on t.id = pt.tag_id
                              where pt.place_id = p.id and t.slug = $3))
@@ -90,6 +92,7 @@ export class FeedService {
         PRIOR_SCORE,
         PRIOR_WEIGHT,
         offset,
+        placeId ?? null,
       ],
     );
   }

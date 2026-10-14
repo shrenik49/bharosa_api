@@ -115,8 +115,8 @@ export class RankingsService {
   /** The caller's own ranked list, best first. */
   listMine(userId: string): Promise<RankedPlaceDto[]> {
     return this.db.query<RankedPlaceDto>(
-      `select r.place_id as "placeId", p.name, r.score
-         from user_place_ranks r join places p on p.id = r.place_id
+      `select r.place_id as "placeId", p.name, a.name as area, r.score
+         from user_place_ranks r join places p on p.id = r.place_id left join areas a on a.id = p.area_id
         where r.user_id = $1 order by r.rank_key desc`,
       [userId],
     );

@@ -1,7 +1,9 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { static as serveStatic } from 'express';
 import type { Server } from 'http';
+import { resolve } from 'path';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { JsonLogger } from './common/logger/json.logger';
@@ -21,9 +23,21 @@ export function configureApp(app: INestApplication): void {
   app.use(helmet());
   app.enableCors({
     origin: config.get('CORS_ORIGINS', { infer: true }), // [] = no browser origin is allowed
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     maxAge: 600,
   });
+  // Uploaded photos (public, like place photos in the app). Replaced by a CDN/bucket URL via MEDIA_BASE_URL later.
+  app.use(
+    '/media',
+    serveStatic(resolve(config.get('UPLOAD_DIR', { infer: true })), {
+      index: false,
+      maxAge: '7d',
+      setHeaders: res => {
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+      },
+    }),
+  );
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
 }
 

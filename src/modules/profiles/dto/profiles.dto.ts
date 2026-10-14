@@ -64,3 +64,16 @@ export class ProfileResponseDto {
   settings: ProfileSettingsDto;
   trust: TrustRecordDto;
 }
+
+export class TasteInterestDto {
+  tagId: number;
+  name: string;
+  kind: string;
+}
+
+export class TasteAffinityDto {
+  tagId: number;
+  name: string;
+  /** 0 to 1: how strongly the person leans to this tag, built from their ranks by a nightly job. */
+  affinity: number;
+}

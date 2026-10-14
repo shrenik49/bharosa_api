@@ -1,3 +1,5 @@
+import { IsIn, IsOptional } from 'class-validator';
+import { PaginationQueryDto } from '../../../common/dto/pagination.dto';
 import { Transform } from 'class-transformer';
 import { IsString, IsUUID, Length } from 'class-validator';
 
@@ -31,4 +33,11 @@ export class ReviewDto {
   authorId: string;
   authorName: string;
   authorHandle: string;
+}
+
+export class ListReviewsQueryDto extends PaginationQueryDto {
+  /** `circle` keeps only reviews by people in my circle. */
+  @IsOptional()
+  @IsIn(['all', 'circle'])
+  filter: 'all' | 'circle' = 'all';
 }

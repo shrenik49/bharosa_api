@@ -158,7 +158,8 @@ describe('Feature endpoints', () => {
         .send({ visitId: visitA, body: 'Crisp dosa.' })
         .expect(201);
       reviewId = review.body.id;
-      await http().post('/reviews').set(as(0)).send({ visitId: visitA, body: 'Again' }).expect(409);
+      const again = await http().post('/reviews').set(as(0)).send({ visitId: visitA, body: 'Crisp dosa.' }).expect(201);
+      expect(again.body.id).toBe(reviewId); // saving again updates the same review
       await http().post('/reviews').set(as(1)).send({ visitId: visitA, body: 'Not mine' }).expect(403);
       const listed = await http().get(`/places/${pa}/reviews`).set(as(0)).expect(200);
       expect(listed.body[0]).toMatchObject({ body: 'Crisp dosa.', authorName: 'Asha' });
@@ -225,7 +226,7 @@ describe('Feature endpoints', () => {
         .send({ visitId: visitA, storagePath: path('p1'), width: 1080, height: 720, bytes: 200000 })
         .expect(201);
       photoId = first.body.id;
-      expect(first.body.url).toBeNull();
+      expect(first.body.url).toBe(`/media/${path('p1')}`);
       await http()
         .post('/photos')
         .set(as(0))

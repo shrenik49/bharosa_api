@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { DatabaseService } from '../../../database/services/database.service';
 import { CircleMemberDto, CircleRelation, TasteTwinDto } from '../dto/circle.dto';
 
-const PERSON = `p.id as "userId", p.handle, p.display_name as "displayName", p.avatar_path as "avatarPath"`;
+const PERSON = `p.id as "userId", p.handle, p.display_name as "displayName", p.avatar_path as "avatarPath", p.is_creator as "isCreator"`;
 
 /** "Owner trusts member": friends, creators and taste twins are the same table with a different relation. */
 @Injectable()
