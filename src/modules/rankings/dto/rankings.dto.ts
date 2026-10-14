@@ -23,5 +23,6 @@ export class ScoreDto {
 export class RankedPlaceDto {
   placeId: string;
   name: string;
+  area: string | null;
   score: number;
 }

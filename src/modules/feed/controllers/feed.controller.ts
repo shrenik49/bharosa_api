@@ -15,8 +15,8 @@ export class FeedController {
   @ApiOkResponse({ type: [FeedItemDto] })
   discover(
     @CurrentUser() user: AuthUser,
-    @Query() { city, filter, limit, offset }: FeedQueryDto,
+    @Query() { city, filter, limit, offset, placeId }: FeedQueryDto,
   ): Promise<FeedItemDto[]> {
-    return this.feed.discover(user.id, city, filter, limit, offset);
+    return this.feed.discover(user.id, city, filter, limit, offset, placeId);
   }
 }

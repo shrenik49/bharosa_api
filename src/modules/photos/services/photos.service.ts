@@ -10,6 +10,7 @@ type PhotoRow = Omit<PhotoDto, 'url' | 'thumbUrl'>;
 const PHOTO = `f.id, f.place_id as "placeId", f.visit_id as "visitId", f.user_id as "userId",
   f.storage_path as "storagePath", f.thumb_path as "thumbPath", f.width, f.height, f.blurhash,
   f.like_count as "likeCount", f.created_at as "createdAt",
+  (select pr.display_name from profiles pr where pr.id = f.user_id) as "authorName",
   exists (select 1 from reactions x where x.user_id = $1 and x.subject_type = 'photo'
            and x.subject_id = f.id and x.kind = 'like') as "likedByMe"`;
 

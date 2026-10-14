@@ -56,6 +56,8 @@ export class PhotoDto {
   placeId: string;
   visitId: string;
   userId: string;
+  /** Display name of the person who took the photo (photo credit). */
+  authorName: string;
   storagePath: string;
   thumbPath: string | null;
   /** Where the file is served: MEDIA_BASE_URL when set, otherwise the API serves it under /media. */

@@ -242,5 +242,33 @@ describe('App support endpoints', () => {
       expect(visits.body[0]).toMatchObject({ placeId: pa, placeName: 'Vaishali' });
       expect(visits.body[0]).toHaveProperty('area');
     });
+
+    it('reads one place from the feed, and ranked places carry their area', async () => {
+      const one = await http().get(`/feed?city=pune&placeId=${pa}`).set(as(0)).expect(200);
+      expect(one.body).toHaveLength(1);
+      expect(one.body[0]).toMatchObject({ placeId: pa, name: 'Vaishali' });
+      await http().get('/feed?city=pune&placeId=not-a-uuid').set(as(0)).expect(400);
+
+      await http()
+        .post('/rankings/compare')
+        .set(as(0))
+        .send({ visitId: visitA, refPlaceId: pb, outcome: 'better' })
+        .expect(200);
+      const ranked = await http().get('/rankings/mine').set(as(0)).expect(200);
+      expect(ranked.body[0]).toHaveProperty('area');
+    });
+
+    it('credits the photographer on photos', async () => {
+      const photo = await http()
+        .post('/photos/upload')
+        .set(as(0))
+        .field('visitId', visitA)
+        .attach('file', JPEG, { filename: 'c.jpg', contentType: 'image/jpeg' })
+        .expect(201);
+      expect(photo.body.authorName).toBe('Sana');
+      const list = await http().get(`/places/${pa}/photos`).set(as(1)).expect(200);
+      expect(list.body[0].authorName).toBe('Sana');
+      await http().delete(`/photos/${photo.body.id}`).set(as(0)).expect(204);
+    });
   });
 });

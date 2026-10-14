@@ -1,7 +1,12 @@
-import { IsOptional, IsString, Matches } from 'class-validator';
+import { IsOptional, IsString, IsUUID, Matches } from 'class-validator';
 import { PaginationQueryDto } from '../../../common/dto/pagination.dto';
 
 export class FeedQueryDto extends PaginationQueryDto {
+  /** Only this place (used to read one place's match score). */
+  @IsOptional()
+  @IsUUID()
+  placeId?: string;
+
   @IsOptional()
   @IsString()
   city: string = 'pune';
