@@ -3,7 +3,7 @@
 NestJS + PostgreSQL backend for Bharosa (restaurant and café discovery for India, launching in Pune; personalised trust scores, only verified visits can rate). It replaces the Supabase backend. The mobile app lives in a separate repo (`bharosa_app`, React Native). Setup, endpoints and known gaps: [README.md](README.md).
 
 ## Git workflow (same as the app repo, minus `main`: only two long-lived branches)
-Remote: set when the GitHub repo exists (planned `git@github.com:shrenik49/bharosa-api.git`).
+Remote: `https://github.com/shrenik49/bharosa_api.git`.
 - `production`: what ships. Updated only by a pull request from `develop`.
 - `develop`: integration branch. Every feature merges here through a pull request.
 - `feature/<name>` (also `fix/<name>`, `docs/<name>`): one branch per feature, created from `develop`, merged back into `develop` by pull request.
