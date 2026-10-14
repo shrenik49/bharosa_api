@@ -2,12 +2,11 @@
 
 NestJS + PostgreSQL backend for Bharosa (restaurant and café discovery for India, launching in Pune; personalised trust scores, only verified visits can rate). It replaces the Supabase backend. The mobile app lives in a separate repo (`bharosa_app`, React Native). Setup, endpoints and known gaps: [README.md](README.md).
 
-## Git workflow (same as the app repo)
+## Git workflow (same as the app repo, minus `main`: only two long-lived branches)
 Remote: set when the GitHub repo exists (planned `git@github.com:shrenik49/bharosa-api.git`).
 - `production`: what ships. Updated only by a pull request from `develop`.
 - `develop`: integration branch. Every feature merges here through a pull request.
 - `feature/<name>` (also `fix/<name>`, `docs/<name>`): one branch per feature, created from `develop`, merged back into `develop` by pull request.
-- `main`: kept in sync with the initial commit; not part of the flow.
 - Never commit directly to `develop` or `production`, and never force-push them.
 - Commit and push only when asked. End commit messages with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
 - `gh` is not installed, so pull requests are opened on GitHub (compare `develop...feature/<name>`).
@@ -51,4 +50,4 @@ Remote: set when the GitHub repo exists (planned `git@github.com:shrenik49/bharo
 ## Status
 - Done: schema (29 tables + reset tokens), all endpoints in the README, 30 unit + 43 e2e tests passing.
 - Not done: photo storage provider, mail provider, moderation/admin role, push notifications, UPI verification. See "Known gaps" in the README.
-- Next: create the GitHub repo and push `main`, `develop`, `production`; choose a hosted Postgres; switch the app's `src/api` layer from Supabase to this API (separate change in the app repo).
+- Next: create the GitHub repo and push `develop` and `production`; choose a hosted Postgres; switch the app's `src/api` layer from Supabase to this API (separate change in the app repo).
