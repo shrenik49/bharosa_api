@@ -3,11 +3,14 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { setupSwagger } from '../src/config/swagger.config';
+import { DatabaseService } from '../src/database/services/database.service';
 import { configureApp } from '../src/main';
 
 /** Cross-cutting behaviour every endpoint inherits: errors, headers, validation, CORS, docs. */
 describe('Platform standards', () => {
   let app: INestApplication;
+  // Every account this suite signs up is removed in afterAll, so repeated runs leave the database clean.
+  const createdEmails: string[] = [];
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
@@ -18,6 +21,9 @@ describe('Platform standards', () => {
   });
 
   afterAll(async () => {
+    if (createdEmails.length > 0) {
+      await app.get(DatabaseService).query('delete from users where email = any($1)', [createdEmails]);
+    }
     await app.close();
   });
 
@@ -38,9 +44,11 @@ describe('Platform standards', () => {
   });
 
   it('rejects malformed ids and out-of-range pagination', async () => {
+    const email = `plat-${Date.now()}@example.com`;
+    createdEmails.push(email);
     const signup = await request(app.getHttpServer())
       .post('/auth/signup')
-      .send({ name: 'Plat', email: `plat-${Date.now()}@example.com`, password: 'password123' })
+      .send({ name: 'Plat', email, password: 'password123' })
       .expect(201);
     const auth = { Authorization: `Bearer ${signup.body.accessToken}` };
     await request(app.getHttpServer()).get('/places/not-a-uuid').set(auth).expect(400);
